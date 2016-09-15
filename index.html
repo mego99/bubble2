@@ -8,7 +8,7 @@
   <style>
     @import 'https://fonts.googleapis.com/css?family=Open+Sans:400,600';
     .land {
-      fill:#79f2d9;
+      fill:#52e1eb;
       stroke:none;
     }
     .border {
@@ -38,13 +38,15 @@
       opacity:0;
       fill:none;
     }
-    .focuscounty path {
-      fill:blue;
+    .focuscounty {
+        opacity:0.5;
+        fill:#f1f1ff;
+        stroke:#ffffff;
+        stroke-opacity:0.9;
     }
     #title  {
       text-anchor:middle;
       font-size: 30px;
-
     }
   </style>
 </head>
@@ -63,7 +65,7 @@
       .attr("width", width)
       .attr("height", height);
 
-    svg.append("text")
+  svg.append("text")
       .text("US Population by County")
       .attr("id","title")
       .attr("transform","translate("+ (width/2) + "," + 50 + ")");
@@ -72,27 +74,26 @@
     if (error) return console.error(error);
 
     svg.append("path")
-    .datum(topojson.feature(us, us.objects.nation))
-    .attr("class", "land")
-    .attr("d", path);
+      .datum(topojson.feature(us, us.objects.nation))
+      .attr("class", "land")
+      .attr("d", path);
 
     svg.append("path")
-    .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-    .attr("class", "border border--state")
-    .attr("d", path);
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .attr("class", "border border--state")
+      .attr("d", path);
 
     var radius = d3.scaleSqrt()
       .domain([0,1e6])
       .range([0,15]);
 
     svg.append("g")
-
-    .selectAll("circle")
-      .data(topojson.feature(us, us.objects.counties).features)
-    .enter().append("circle")
-      .attr("class","bubble")
-      .attr("transform", function(d) {return "translate(" + path.centroid(d) + ")";  })
-      .attr("r", function(d) {return radius(d.properties.population)});
+      .selectAll("circle")
+        .data(topojson.feature(us, us.objects.counties).features)
+      .enter().append("circle")
+        .attr("class", function(d) {return "bubble id" + d.id})
+        .attr("transform", function(d) {return "translate(" + path.centroid(d) + ")";  })
+        .attr("r", function(d) {return radius(d.properties.population)});
 
 // console.log(topojson.feature(us, us.objects.counties).features);
 // console.log(topojson.feature(us, us.objects.counties).features);
@@ -128,12 +129,8 @@
       .x(function(d) {return path.centroid(d)[0]})
       .y(function(d) {return path.centroid(d)[1]});
 
-
-
-
     var voronoiGroup = svg.append("g")
       .attr("class","voronoiGroup");
-
 
     voronoiGroup.selectAll("path")
       .data( voronoi.polygons( topojson.feature(us, us.objects.counties).features ) )
@@ -142,28 +139,30 @@
         .attr("d", function(d) {return d ? "M" + d.join("L") + "Z" : null})
         .on("mouseover",mouseover)
           .data(topojson.feature(us, us.objects.counties).features)
-        // .on("mouseout",mouseout)
-        //   .data(topojson.feature(us, us.objects.counties).features);
-
+        .on("mouseout",mouseout)
+          .data(topojson.feature(us, us.objects.counties).features);
 
     function mouseover(d) {
       // console.log(d.properties.name);
       var name = d.properties.name;
       var centroid = path.centroid(d);
+      var activeid = ".id" + d.id;
       // console.log(centroid);
       focus.select("text")
         .text(name)
         .attr("transform", "translate(" + centroid + ")");
-      d3.select(this)
-          .attr("class","focuscounty");
-      console.log(d3.select(this));
+      // console.log(d.id);
+      svg.select(activeid)
+        .classed("focuscounty",true)
     }
 
     function mouseout(d) {
-      focus.select("text")
-        .attr("transform","translate(-100,-100)")
+      // focus.select("text")
+      //   .attr("transform","translate(-100,-100)")
+      var activeid = ".id" + d.id;
+      svg.select(activeid)
+        .classed("focuscounty",false)
     }
-
   });
   </script>
 
