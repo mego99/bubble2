@@ -44,6 +44,13 @@
         stroke:#ffffff;
         stroke-opacity:0.9;
     }
+    /*.bubble:hover{
+        opacity:0.5;
+        fill:#f1f1ff;
+        stroke:#ffffff;
+        stroke-opacity:0.9;
+    }*/
+
     #title  {
       text-anchor:middle;
       font-size: 30px;
@@ -69,6 +76,10 @@
       .text("US Population by County")
       .attr("id","title")
       .attr("transform","translate("+ (width/2) + "," + 50 + ")");
+  // svg.append("text")
+  //     .text("source: 2014 census data")
+  //     .attr("id","source")
+  //     .attr("transform","translate("+ (width/2) + "," + 50 + ")");
 
   d3.json("us.json", function(error, us) {
     if (error) return console.error(error);
@@ -133,9 +144,9 @@
       .attr("class","voronoiGroup");
 
     voronoiGroup.selectAll("path")
-      .data( voronoi.polygons( topojson.feature(us, us.objects.counties).features ) )
-      //problem: data only binds polygons, but need "names" and "properties" for mouseover
+      .data(voronoi.polygons( topojson.feature(us, us.objects.counties).features))
       .enter().append("path")
+        .data(voronoi.polygons( topojson.feature(us, us.objects.counties).features))
         .attr("d", function(d) {return d ? "M" + d.join("L") + "Z" : null})
         .on("mouseover",mouseover)
           .data(topojson.feature(us, us.objects.counties).features)
